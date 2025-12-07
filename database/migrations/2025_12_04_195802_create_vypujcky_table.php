@@ -15,8 +15,9 @@ return new class extends Migration
             $table->integer('vypujcka_id', true);
             $table->integer('uzivatel_id')->index('uzivatel_id');
             $table->integer('kopie_id')->index('kopie_id');
-            $table->enum('status_pozadavku', ['ceka_na_schvaleni', 'schvaleno', 'vypujceno', 'vraceno', 'zamitnuto'])->default('ceka_na_schvaleni');
+            $table->enum('status_pozadavku', ['ceka_na_schvaleni', 'schvaleno', 'zamitnuto', 'vraceno'])->default('ceka_na_schvaleni');
             $table->dateTime('datum_pozadavku')->useCurrent();
+            $table->date('datum_schvaleni')->nullable();
             $table->date('planovane_datum_vraceni')->nullable();
             $table->date('skutecne_datum_vraceni')->nullable();
         });

@@ -5,6 +5,11 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Hra;
 use App\Models\Kategorie;
+use App\Models\Kopie;
+use App\Models\Vypujcka;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 
 class HraController extends Controller
 {
@@ -56,5 +61,97 @@ class HraController extends Controller
     {
         $hra = Hra::with('kategorie', 'kopie')->findOrFail($id);
         return view('hry.show', ['hra' => $hra]);
+    }
+
+    // Rezervace hry
+    public function rezervovat($id)
+    {
+        $userID = Auth::id(); // Získání ID přihlášeného uživatele
+        $kopie = Kopie::where('hra_id', $id) // Vyhledání první dostupné kopie hry
+            ->where('stav', 'dostupna')
+            ->first();
+        
+        DB::transaction(function () use ($kopie, $userID) {
+            // Aktualizace stavu kopie na 'rezervovana'
+            $kopie->stav = 'nedostupna';
+            $kopie->save();
+
+            // Vytvoření záznamu o rezervaci
+            Vypujcka::create([
+                'uzivatel_id' => $userID,
+                'kopie_id' => $kopie->kopie_id,
+                'status_pozadavku' => 'ceka_na_schvaleni',
+                'datum_pozadavku' => now(),
+            ]);
+        });
+
+        return redirect()->route('hry.show', ['id' => $kopie->hra_id])->with('success', 'Hra byla úspěšně rezervována.'); // Přesměrování zpět na stránku hry s úspěšnou zprávou
+    }
+
+    public function uzivatelskyProfil()
+    {
+        $vypujcky = Vypujcka::where('uzivatel_id', Auth::id())
+            ->where('status_pozadavku', '!=', 'vraceno') // Zobrazení jen aktuálních výpůjček
+            ->with('kopie.hra') // Načtení související hry přes kopii
+            ->get();
+
+        return view('uzivatelsky-profil', [
+            'vypujcky' => $vypujcky,
+        ]);
+    }
+    public function adminProfil(Request $request)
+    {
+        $vypujcky = Vypujcka::with('kopie.hra', 'uzivatel')
+            ->where('status_pozadavku', 'ceka_na_schvaleni');
+        $uzivatele = User::all();
+        
+        // Filtrace podle uživatele
+        $selectedUzivatel = $request->input('search_user', ''); // vyhodí jen jmeno uživatele
+        $selectedUzivatelId = $uzivatele->firstWhere('name', $selectedUzivatel)?->uzivatel_id; //pokud uživatel toho jména existuje, vyhoď jeho ID
+        if (!empty($selectedUzivatelId)) {
+            $vypujcky->where('uzivatel_id', $selectedUzivatelId); // filtrace vypujcek podle uživatele
+        }
+
+        $vypujcky = $vypujcky->get();
+
+        return view('admin-profil', [
+            'selectedUzivatelId' => $selectedUzivatelId,
+            'vypujcky' => $vypujcky,
+            'uzivatele' => $uzivatele,
+            'request' => $request,
+        ]);
+    }
+
+    public function schvalit($id)
+    {
+        $vypujcka = Vypujcka::where('kopie_id', $id) // Vyhledání výpůjčky podle ID kopie
+            ->where('status_pozadavku', 'ceka_na_schvaleni')
+            ->firstOrFail();
+
+        DB::transaction(function () use ($vypujcka) {
+            // Aktualizace stavu výpůjčky na 'schvaleno'
+            $vypujcka->status_pozadavku = 'schvaleno';
+            $vypujcka->planovane_datum_vraceni = now()->addDays(30); // Nastavení plánovaného data vrácení na 30 dní od schválení
+            $vypujcka->save();
+        });
+
+        return redirect()->route('admin-profil')->with('success', 'Výpůjčka byla úspěšně schválena.'); // Přesměrování zpět na admin profil s úspěšnou zprávou
+    }
+    public function vratit($id)
+    {
+        $vypujcka = Vypujcka::where('kopie_id', $id) // Vyhledání výpůjčky podle ID kopie
+            ->where('status_pozadavku', 'schvaleno')
+            ->firstOrFail();
+        DB::transaction(function () use ($vypujcka) {
+            // Aktualizace stavu výpůjčky
+            $vypujcka->skutecne_datum_vraceni = now(); // Nastavení data vrácení na aktuální datum
+            $vypujcka->status_pozadavku = 'vraceno';
+            $vypujcka->save();
+            // Aktualizace stavu kopie na 'dostupna'
+            $kopie = $vypujcka->kopie;
+            $kopie->stav = 'dostupna';
+            $kopie->save();
+        });
+        return redirect()->route('uzivatelsky-profil')->with('success', 'Výpůjčka byla úspěšně vrácena.'); // Přesměrování zpět na uživatelský profil s úspěšnou zprávou
     }
 }

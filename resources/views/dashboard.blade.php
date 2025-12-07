@@ -80,7 +80,11 @@
                                         </div>
                                         
                                         <div class="mt-2 text-sm text-gray-500">
-                                            Skladem: {{ $hra->kopie->where('stav', 'dostupna')->count() }} ks
+                                            @if ($hra->kopie->where('stav', 'dostupna')->count() != 0)
+                                                <span class="text-green-600 font-bold">Skladem: {{ $hra->kopie->where('stav', 'dostupna')->count() }} ks</span>
+                                            @else
+                                                <span class="text-red-600 font-bold">Není skladem</span>
+                                            @endif
                                         </div>
 
                                         <div class="mt-2 text-sm text-gray-500">

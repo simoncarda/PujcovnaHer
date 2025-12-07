@@ -58,4 +58,9 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function isAdmin() // Přidána metoda isAdmin
+    {
+        return $this->is_admin === 1;
+    }
 }

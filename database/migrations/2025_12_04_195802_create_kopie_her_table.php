@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('kopie_her', function (Blueprint $table) {
             $table->integer('kopie_id', true);
             $table->integer('hra_id')->index('hra_id');
-            $table->enum('stav', ['dostupna', 'pujcena'])->default('dostupna');
+            $table->enum('stav', ['dostupna', 'nedostupna'])->default('dostupna');
         });
     }
 

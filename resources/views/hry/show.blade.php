@@ -48,9 +48,13 @@
                                 <span class="text-green-600 font-bold flex items-center">
                                     Skladem ({{ $dostupne }} ks)
                                 </span>
-                                <x-button class="mt-4 bg-green-500 hover:bg-green-700">
-                                    Rezervovat
-                                </x-button>
+
+                                <form method="POST" action="{{ route('hry.rezervovat', ['id' => $hra->hra_id]) }}">
+                                    @csrf <x-button class="mt-4 bg-green-500 hover:bg-green-700">
+                                        Rezervovat
+                                    </x-button>
+                                </form>
+                                
                             @else
                                 <span class="text-red-600 font-bold">
                                     Momentálně nedostupné
@@ -61,11 +65,11 @@
 
                 </div>
                 
-                <div class="bg-gray-50 px-6 py-4 border-t">
-                    <a href="{{ route('dashboard') }}" class="text-gray-600 hover:underline">
-                        &larr; Zpět na úvodní stranu
+                {{-- <div class="bg-gray-50 px-6 py-4 border-t">
+                    <a href="{{ url()->previous() }}" class="text-gray-600 hover:underline">
+                        &larr; Zpět předchozí stránku
                     </a>
-                </div>
+                </div> --}}
 
             </div>
         </div>

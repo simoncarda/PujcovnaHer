@@ -18,10 +18,19 @@
                 </div>
 
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
-                    <x-nav-link href="{{ route('hry.index') }}" :active="request()->routeIs('hry.index')">
-                        {{ __('Hry') }}
+                    <x-nav-link href="{{ route('uzivatelsky-profil') }}" :active="request()->routeIs('uzivatelsky-profil')">
+                        {{ __('Můj profil') }}
                     </x-nav-link>
                 </div>
+
+                {{-- Zobrazí link jen pokud je uživatel admin a zároveň je přihlášený --}}
+                @if (Auth::user() && Auth::user()->isAdmin()) 
+                    <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
+                        <x-nav-link href="{{ route('admin-profil') }}" :active="request()->routeIs('admin-profil')">
+                            {{ __('Schvalování výpůjček') }}
+                        </x-nav-link>
+                    </div>
+                @endif
             </div>
 
             <div class="hidden sm:flex sm:items-center sm:ms-6">
