@@ -37,3 +37,7 @@ Route::post('/hry/{id}/vratit', [HraController::class, 'vratit'])
 Route::post('/hry/{id}/schvalit', [HraController::class, 'schvalit'])
     ->middleware('auth') // Důležité: Schválit může jen přihlášený!
     ->name('hry.schvalit');
+
+Route::get('/sources', function () {
+    return view('sources');
+})->name('sources');
