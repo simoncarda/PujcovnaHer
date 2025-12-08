@@ -21,16 +21,32 @@
                                         <a class="text-lg font-bold visited:text-purple-600 hover:underline col-span-7" href="{{ route('hry.show', ['id' => $vypujcka->kopie->hra->hra_id]) }}">{{ $vypujcka->kopie->hra->nazev }}</a>
 
                                         <div class="mt-2 text-sm col-span-3">
-                                            {{ $vypujcka->planovane_datum_vraceni ? $vypujcka->planovane_datum_vraceni : 'Čeká na schválení' }}
+                                            @if ($vypujcka->status_pozadavku === 'ceka_na_schvaleni')
+                                                Čeká na schválení
+                                            @elseif ($vypujcka->status_pozadavku === 'schvaleno')
+                                                {{ $vypujcka->planovane_datum_vraceni }}
+                                            @elseif ($vypujcka->status_pozadavku === 'zamitnuto')
+                                                Zamítnuto
+                                            @endif
+
                                         </div>
 
-                                        <div class="mt-2 text-sm col-span-2">
+                                        <div class="mt-2 text-sm col-span-2 flex gap-2">
                                             <form method="POST" action="{{ route('hry.vratit', ['id' => $vypujcka->kopie->kopie_id]) }}">
                                                 @csrf
                                                 <button type="submit" class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded disabled:opacity-50 disabled:cursor-not-allowed" {{ ($vypujcka->status_pozadavku) == 'schvaleno' ? '' : 'disabled' }}>
                                                     Vrátit hru
                                                 </button>
                                             </form>
+                                            @if ($vypujcka->status_pozadavku === 'zamitnuto')
+                                                <form method="POST" action="{{ route('hry.skryt', ['id' => $vypujcka->kopie->kopie_id]) }}">
+                                                    @csrf
+                                                    <button class="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded">
+                                                        Skrýt
+                                                    </button>
+                                                </form>
+                                            @endif
+
                                         </div>
                                     </div>
                                 @endforeach

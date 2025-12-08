@@ -1,7 +1,4 @@
 <x-app-layout>
-    <x-slot name="header">
-       
-    </x-slot>
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
@@ -54,8 +51,11 @@
                                     <span class="font-bold col-span-2">Akce</span>
                                 </div>
                                 @foreach ($vypujcky as $vypujcka)
-                                    <div class="grid grid-cols-12 border p-4 rounded-lg">
-                                        <a class="text-lg font-bold visited:text-purple-600 hover:underline col-span-5" href="{{ route('hry.show', ['id' => $vypujcka->kopie->hra->hra_id]) }}">{{ $vypujcka->kopie->hra->nazev }}</a>
+                                    <div class="grid grid-cols-12 border p-4 rounded-lg items-center gap-2">
+                                        <a class="text-lg font-bold col-span-5"
+                                        href="{{ route('hry.show', ['id' => $vypujcka->kopie->hra->hra_id]) }}">
+                                            {{ $vypujcka->kopie->hra->nazev }}
+                                        </a>
 
                                         <div class="mt-2 text-sm col-span-2">
                                             {{ $vypujcka->uzivatel->name }}
@@ -65,11 +65,21 @@
                                             {{ $vypujcka->datum_pozadavku ? $vypujcka->datum_pozadavku : 'Chybí' }}
                                         </div>
 
-                                        <div class="mt-2 text-sm col-span-2">
+                                        {{-- tady je ta důležitá změna --}}
+                                        <div class="mt-2 text-sm col-span-12 md:col-span-2 flex justify-end gap-2">
                                             <form method="POST" action="{{ route('hry.schvalit', ['id' => $vypujcka->kopie->kopie_id]) }}">
                                                 @csrf
-                                                <button type="submit" class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
+                                                <button type="submit"
+                                                    class="bg-green-500 hover:bg-green-700 text-white font-bold py-2 px-4 rounded">
                                                     Schválit
+                                                </button>
+                                            </form>
+
+                                            <form method="POST" action="{{ route('hry.zamitnout', ['id' => $vypujcka->kopie->kopie_id]) }}">
+                                                @csrf
+                                                <button type="submit"
+                                                    class="bg-red-500 hover:bg-red-700 text-white font-bold py-2 px-4 rounded">
+                                                    Zamítnout
                                                 </button>
                                             </form>
                                         </div>

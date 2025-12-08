@@ -92,6 +92,7 @@ class HraController extends Controller
     {
         $vypujcky = Vypujcka::where('uzivatel_id', Auth::id())
             ->where('status_pozadavku', '!=', 'vraceno') // Zobrazení jen aktuálních výpůjček
+            ->where('skryto', false) //Zobrazení pouze záznamů, které uživatel neskryl
             ->with('kopie.hra') // Načtení související hry přes kopii
             ->get();
 
@@ -137,6 +138,7 @@ class HraController extends Controller
 
         return redirect()->route('admin-profil')->with('success', 'Výpůjčka byla úspěšně schválena.'); // Přesměrování zpět na admin profil s úspěšnou zprávou
     }
+
     public function vratit($id)
     {
         $vypujcka = Vypujcka::where('kopie_id', $id) // Vyhledání výpůjčky podle ID kopie
@@ -154,4 +156,40 @@ class HraController extends Controller
         });
         return redirect()->route('uzivatelsky-profil')->with('success', 'Výpůjčka byla úspěšně vrácena.'); // Přesměrování zpět na uživatelský profil s úspěšnou zprávou
     }
+
+    public function zamitnout($id)
+    {
+        $vypujcka = Vypujcka::where('kopie_id', $id) // Vyhledání výpůjčky podle ID kopie
+            ->where('status_pozadavku', 'ceka_na_schvaleni')
+            ->firstOrFail();
+
+        DB::transaction(function () use ($vypujcka) {
+            // Aktualizace stavu výpůjčky na 'zamitnuto'
+            $vypujcka->status_pozadavku = 'zamitnuto';
+            $vypujcka->planovane_datum_vraceni = null;
+            $vypujcka->save();
+
+            // kopie -> znovu dostupná
+            $kopie = $vypujcka->kopie;
+            $kopie->stav = 'dostupna';
+            $kopie->save();
+        });
+
+        return redirect()->route('admin-profil')->with('success', 'Výpůjčka byla úspěšně zamítnuta.'); // Přesměrování zpět na admin profil s úspěšnou zprávou
+    }
+
+    public function skryt($id)
+    {
+        $vypujcka = Vypujcka::where('kopie_id', $id)
+            ->where('uzivatel_id', Auth::id())
+            ->firstOrFail();
+
+        $vypujcka->skryto = true;
+        $vypujcka->save();
+
+        return redirect()
+            ->route('uzivatelsky-profil')
+            ->with('success', 'Záznam byl skryt.');
+    }
+
 }
