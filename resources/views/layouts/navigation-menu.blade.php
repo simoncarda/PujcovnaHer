@@ -13,15 +13,17 @@
                 <!-- Navigation Links -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link href="{{ route('dashboard') }}" :active="request()->routeIs('dashboard')">
-                        {{ __('Dashboard') }}
+                        {{ __('Katalog') }}
                     </x-nav-link>
                 </div>
 
+                @auth
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link href="{{ route('uzivatelsky-profil') }}" :active="request()->routeIs('uzivatelsky-profil')">
                         {{ __('Můj profil') }}
                     </x-nav-link>
                 </div>
+                @endauth
 
                 {{-- Zobrazí link jen pokud je uživatel admin a zároveň je přihlášený --}}
                 @if (Auth::user() && Auth::user()->isAdmin()) 
@@ -146,6 +148,25 @@
                     </x-dropdown>
                 </div>
                 @endauth
+
+                @guest
+                    <!-- Tlačítko Registrovat pro nepřihlášené -->
+                    <div class="ms-3">
+                        <a href="{{ route('register') }}"
+                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md 
+                                text-white bg-indigo-600 hover:bg-indigo-700">
+                            Registrovat
+                        </a>
+                    </div>
+
+                    <div class="ms-3">
+                        <a href="{{ route('login') }}"
+                        class="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md 
+                                text-gray-700 bg-gray-200 hover:bg-gray-300">
+                            Přihlásit se
+                        </a>
+                    </div>
+                @endguest
             </div>
             
 
