@@ -57,8 +57,9 @@
                         <div class="p-6 lg:p-8 bg-white border-b border-gray-200">
                             <p class="text-gray-500">Zobrazeno {{ $hry->count() }} výsledků</p>
                              <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-                                @foreach ($hry as $hra)
-                                    <div class="border p-4 rounded-lg">
+                                @foreach ($hry as $hra)                                    
+                                    <div onclick="window.location='{{ route('hry.show', $hra->hra_id) }}'" class="border p-4 rounded-lg bg-white shadow-sm hover:shadow-md hover:bg-gray-50
+                                                                                                                    cursor-pointer transition-transform duration-150 hover:-translate-y-1">
                                         <img src="{{ asset($hra->url_obrazku) }}" alt="{{ $hra->nazev }}" class="w-full h-48 object-cover mb-4 rounded">
                                         <a class="text-lg font-bold visited:text-purple-600 hover:underline" href="{{ route('hry.show', ['id' => $hra->hra_id]) }}">{{ $hra->nazev }}</a>
                                         <p class="text-gray-600">{{ $hra->popis }}</p> 
@@ -91,9 +92,9 @@
                                         </div>
                                     </div>
                                 @endforeach
+                            </div>
                         </div>
-                    </div>
-                    
+                    </div> 
                 </div>
                 
             </div>
